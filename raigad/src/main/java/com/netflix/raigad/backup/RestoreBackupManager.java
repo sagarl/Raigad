@@ -48,6 +48,7 @@ public class RestoreBackupManager extends Task
     private static final AtomicBoolean isRestoreRunning = new AtomicBoolean(false);
     private static final String ALL_INDICES_TAG = "_all";
     private static final String SUFFIX_SEPARATOR_TAG = "-";
+    private static final String COMMA_SEPARATOR = ",";
 
 
     @Inject
@@ -187,7 +188,7 @@ public class RestoreBackupManager extends Task
             //This is a blocking call. It'll wait until Restore is finished.
             restoreSnapshotResponse = esTransportClient.admin().cluster().prepareRestoreSnapshot(restoreRepositoryName, snapshotN)
                     .setWaitForCompletion(true)
-                    .setIndices(commaSeparatedIndices.split(","))   //"test-idx-*", "-test-idx-2"
+                    .setIndices(commaSeparatedIndices.split(COMMA_SEPARATOR))   //"test-idx-*", "-test-idx-2"
                     .execute()
                     .actionGet();
         }else{

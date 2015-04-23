@@ -51,6 +51,8 @@ public class SnapshotBackupManager extends Task
     private static final AtomicBoolean isSnapshotRunning = new AtomicBoolean(false);
     private static final DateTimeZone currentZone = DateTimeZone.UTC;
     private static final String S3_REPO_FOLDER_DATE_FORMAT = "yyyyMMddHHmm";
+    private static final String COMMA_SEPARATOR = ",";
+    private static final String INDEX_SEPARATOR_TAG = "_";
     private static Timer snapshotDuration = new BasicTimer(MonitorConfig.builder("snapshotDuration").withTag("class","Elasticsearch_SnapshotBackupReporter").build(), TimeUnit.SECONDS);
 
     static {
@@ -188,8 +190,8 @@ public class SnapshotBackupManager extends Task
             if (indices.toLowerCase().equals("all"))
                 indexName = "all";
             else
-                indexName = StringUtils.replace(indices, ",", "_");
-            snapshotName.append(indexName).append("_");
+                indexName = StringUtils.replace(indices, COMMA_SEPARATOR, INDEX_SEPARATOR_TAG);
+            snapshotName.append(indexName).append(INDEX_SEPARATOR_TAG);
         }
 
         DateTime dt = new DateTime();
@@ -211,7 +213,7 @@ public class SnapshotBackupManager extends Task
     {
        return esTransportClient.admin().cluster().prepareCreateSnapshot(repositoryName, snapshotName)
                .setWaitForCompletion(config.waitForCompletionOfBackup())
-               .setIndices(config.getCommaSeparatedIndicesToBackup())
+               .setIndices(config.getCommaSeparatedIndicesToBackup().split(COMMA_SEPARATOR))
                .setIncludeGlobalState(config.includeGlobalStateDuringBackup())
                .setPartial(config.partiallyBackupIndices()).get();
     }
